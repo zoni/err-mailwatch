@@ -13,10 +13,8 @@
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 from errbot import BotPlugin, botcmd
-import config
 import logging
 
-import re
 import imaplib
 import email, email.utils, email.header
 
