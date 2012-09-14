@@ -1,0 +1,7 @@
+[Core]
+Name = MailWatch
+Module = mailwatch
+    
+[Documentation]
+Description = Watch specified mailboxes for new mails
+
