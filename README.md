@@ -5,7 +5,11 @@ Poll IMAP mailboxes for new mail
 
 ### Installation
 
-MailWatch isn't in Err's list of repo's just yet. For now, you can clone this repository into your BOT\_EXTRA\_PLUGIN\_DIR
+You can install MailWatch directly from err using:
+
+	!repos install err-mailwatch
+
+Alternatively, you can also clone this repository into your BOT\_EXTRA\_PLUGIN\_DIR and restart your bot to load the new plugin.
 
 ### Configuration
 
