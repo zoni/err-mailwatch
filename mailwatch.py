@@ -24,7 +24,7 @@ class MailWatch(BotPlugin):
 	def activate(self):
 		super(MailWatch, self).activate()
 		
-		if set(("INTERVAL", "ACCOUNTS")) <= set(self.config):
+		if self.config is not None and set(("INTERVAL", "ACCOUNTS")) <= set(self.config):
 			self.start_poller(self.config['INTERVAL'], self.runpolls)
 		else:
 			logging.info("Not starting MailWatch poller, plugin not configured")
