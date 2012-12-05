@@ -34,16 +34,16 @@ class MailWatch(BotPlugin):
 			logging.info("Not starting MailWatch poller, plugin not configured")
 
 	def get_configuration_template(self):
-		return {'INTERVAL': 60, 'ACCOUNTS': [{'HOSTNAME': 'domain.tld', 'USERNAME': 'username', 'PASSWORD': 'password', 'ROOM': 'roomid@conference.domain.tld', 'SSL': True}]}
+		return {'INTERVAL': 60, 'ACCOUNTS': [{'HOSTNAME': 'domain.tld', 'MAILBOX': 'inbox', 'USERNAME': 'username', 'PASSWORD': 'password', 'ROOM': 'roomid@conference.domain.tld', 'SSL': True}]}
 
 	def runpolls(self):
 		"""Polls all configured mailboxes"""
 		assert 'ACCOUNTS' in self.config
 
 		for account in self.config['ACCOUNTS']:
-			self.poll(account['HOSTNAME'], account['USERNAME'], account['PASSWORD'], account['ROOM'])
+			self.poll(account['HOSTNAME'], account['MAILBOX'], account['USERNAME'], account['PASSWORD'], account['ROOM'])
 
-	def poll(self, host, user, passwd, room, ssl=True):
+	def poll(self, host, mailbox, user, passwd, room, ssl=True):
 		"""Poll an IMAP mailbox"""
 		logging.info("Polling {0}@{1}".format(user, host))
 		if 'seen' not in self.shelf.keys():
@@ -59,8 +59,8 @@ class MailWatch(BotPlugin):
 		code,message = M.login(user, passwd)
 		logging.debug("{0}: {1}".format(code, message))
 
-		logging.debug("IMAP SELECT")
-		M.select()
+		logging.debug("IMAP SELECT: {0}".format(mailbox))
+		M.select(mailbox)
 		logging.debug("{0}: {1}".format(code, message))
 		logging.debug("IMAP SEARCH")
 		if self._highest_uid is None:
