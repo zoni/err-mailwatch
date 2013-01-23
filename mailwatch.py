@@ -22,7 +22,6 @@ import datetime
 class MailWatch(BotPlugin):
 	""""Poll IMAP mailboxes and report new mails to specified chatrooms"""
 	min_err_version = '1.6.0'
-	_initial_poll = True # True if poll hasn't run yet since plugin activation
 	_highest_uid = None # Highest UID we've encountered, so we know where we left off
 
 	def activate(self):
@@ -64,12 +63,10 @@ class MailWatch(BotPlugin):
 		M.select()
 		logging.debug("{0}: {1}".format(code, message))
 		logging.debug("IMAP SEARCH")
-		if self._initial_poll:
-			self._initial_poll = False
-			# UID's *might* have changed since last time we checked, so start all over, looking only at mail sent in the last week
+		if self._highest_uid is None:
 			search = '(SENTSINCE {})'.format((datetime.datetime.now() + datetime.timedelta(weeks=-1)).strftime('%d-%b-%Y'))
 		else:
-			search = 'UID {}:*'.format(self._highest_uid)
+			search = '(UID {}:*)'.format(self._highest_uid)
 		typ, data = M.search(None, search)
 		logging.debug("{0}: {1}".format(typ, data))
 
