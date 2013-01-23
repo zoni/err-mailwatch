@@ -34,7 +34,12 @@ class MailWatch(BotPlugin):
 			logging.info("Not starting MailWatch poller, plugin not configured")
 
 	def get_configuration_template(self):
-		return {'INTERVAL': 60, 'ACCOUNTS': [{'HOSTNAME': 'domain.tld', 'MAILBOX': 'inbox', 'USERNAME': 'username', 'PASSWORD': 'password', 'ROOM': 'roomid@conference.domain.tld', 'SSL': True}]}
+		return {'INTERVAL': 60, 'ACCOUNTS': [{'HOSTNAME': 'domain.tld', 'MAILBOX': 'INBOX', 'USERNAME': 'username', 'PASSWORD': 'password', 'ROOM': 'roomid@conference.domain.tld', 'SSL': True}]}
+
+	def check_configuration(self, configuration):
+		for i,item in enumerate(configuration['ACCOUNTS']):
+			if 'MAILBOX' not in item:
+				configuration['ACCOUNTS'][i]['MAILBOX'] = 'INBOX' 
 
 	def runpolls(self):
 		"""Polls all configured mailboxes"""
