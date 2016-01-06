@@ -99,7 +99,7 @@ class MailWatch(BotPlugin):
 				self.send(room, message, message_type='groupchat')
 			else:
 				logging.debug("Seen message: {0}".format(mail.get('Message-ID')))
-			self._highest_uid = num
+			self._highest_uid = num.decode('ascii')
 		M.close()
 		M.logout()
 		self.shelf['seen'] = seen
