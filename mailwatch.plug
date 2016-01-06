@@ -1,3 +1,6 @@
+[Python]
+Version=2+
+
 [Core]
 Name = MailWatch
 Module = mailwatch
