@@ -19,6 +19,8 @@ import imaplib
 import email, email.utils, email.header
 import datetime
 
+log = logging.getLogger('errbot.plugins.mailwatch')
+
 class MailWatch(BotPlugin):
 	""""Poll IMAP mailboxes and report new mails to specified chatrooms"""
 	min_err_version = '1.6.0'
@@ -31,7 +33,7 @@ class MailWatch(BotPlugin):
 			self._initial_poll = True
 			self.start_poller(self.config['INTERVAL'], self.runpolls)
 		else:
-			logging.info("Not starting MailWatch poller, plugin not configured")
+			log.info("Not starting MailWatch poller, plugin not configured")
 
 	def get_configuration_template(self):
 		return {'INTERVAL': 60, 'ACCOUNTS': [{'HOSTNAME': 'domain.tld', 'MAILBOX': 'INBOX', 'USERNAME': 'username', 'PASSWORD': 'password', 'ROOM': 'roomid@conference.domain.tld', 'SSL': True}]}
@@ -50,7 +52,7 @@ class MailWatch(BotPlugin):
 
 	def poll(self, host, mailbox, user, passwd, room, ssl=True):
 		"""Poll an IMAP mailbox"""
-		logging.info("Polling {0}@{1}".format(user, host))
+		log.info("Polling {0}@{1}".format(user, host))
 
 		if 'seen' not in self.shelf.keys():
 			seen = []
@@ -61,20 +63,20 @@ class MailWatch(BotPlugin):
 		else:
 			M = imaplib.IMAP4(host)
 
-		logging.debug("IMAP LOGIN")
+		log.debug("IMAP LOGIN")
 		code,message = M.login(user, passwd)
-		logging.debug("{0}: {1}".format(code, message))
+		log.debug("{0}: {1}".format(code, message))
 
-		logging.debug("IMAP SELECT: {0}".format(mailbox))
+		log.debug("IMAP SELECT: {0}".format(mailbox))
 		M.select(mailbox)
-		logging.debug("{0}: {1}".format(code, message))
-		logging.debug("IMAP SEARCH")
+		log.debug("{0}: {1}".format(code, message))
+		log.debug("IMAP SEARCH")
 		if self._highest_uid is None:
 			search = '(SENTSINCE {})'.format((datetime.datetime.now() + datetime.timedelta(weeks=-1)).strftime('%d-%b-%Y'))
 		else:
 			search = '(UID {}:*)'.format(self._highest_uid)
 		typ, data = M.search(None, search)
-		logging.debug("{0}: {1}".format(typ, data))
+		log.debug("{0}: {1}".format(typ, data))
 
 		for num in data[0].split():
 			typ, data = M.fetch(num, '(RFC822.HEADER)')
@@ -82,7 +84,7 @@ class MailWatch(BotPlugin):
 			# raw_message is a bytestring which must be decoded to make it usable
 			mail = email.message_from_string(raw_mail.decode("utf-8", "ignore"))
 			if mail.get('Message-ID') not in seen:
-				logging.debug("New message: {0}".format(mail.get('Message-ID')))
+				log.debug("New message: {0}".format(mail.get('Message-ID')))
 				seen.append(mail.get('Message-ID'))
 
 				message = 'New email arrived'
@@ -99,7 +101,7 @@ class MailWatch(BotPlugin):
 
 				self.send(room, message, message_type='groupchat')
 			else:
-				logging.debug("Seen message: {0}".format(mail.get('Message-ID')))
+				log.debug("Seen message: {0}".format(mail.get('Message-ID')))
 			self._highest_uid = num.decode('ascii')
 		M.close()
 		M.logout()
