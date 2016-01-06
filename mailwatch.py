@@ -83,11 +83,19 @@ class MailWatch(BotPlugin):
 			if mail.get('Message-ID') not in seen:
 				logging.debug("New message: {0}".format(mail.get('Message-ID')))
 				seen.append(mail.get('Message-ID'))
-				message = "New email arrived"
-				message += "\n\tFrom: {0}".format(email.header.decode_header(mail.get('from'))[0][0])
-				message += "\n\tTo: {0}".format(email.header.decode_header(mail.get('to'))[0][0])
-				message += "\n\tCc: {0}".format(email.header.decode_header(mail.get('cc'))[0][0])
-				message += "\n\tSubject: {0}".format(email.header.decode_header(mail.get('subject'))[0][0])
+
+				message = ''
+				for hdrname in ['From','To','Cc','Subject']:
+					value = mail.get(hdrname) or None
+					if value:
+						(hdrvalue, charset) = email.header.decode_header(value)[0]
+						if isinstance(hdrvalue, str):
+							message += "{}: {}\n".format(hdrname, hdrvalue)
+						elif charset is not None:
+							message += "{}: {}\n".format(hdrname, hdrvalue.decode(charset,'ignore'))
+						else:
+							message += "{}: {}\n".format(hdrname, hdrvalue)
+
 				self.send(room, message, message_type='groupchat')
 			else:
 				logging.debug("Seen message: {0}".format(mail.get('Message-ID')))
