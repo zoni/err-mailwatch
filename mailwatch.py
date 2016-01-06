@@ -51,6 +51,7 @@ class MailWatch(BotPlugin):
 	def poll(self, host, mailbox, user, passwd, room, ssl=True):
 		"""Poll an IMAP mailbox"""
 		logging.info("Polling {0}@{1}".format(user, host))
+
 		if 'seen' not in self.shelf.keys():
 			seen = []
 		else:
@@ -84,17 +85,17 @@ class MailWatch(BotPlugin):
 				logging.debug("New message: {0}".format(mail.get('Message-ID')))
 				seen.append(mail.get('Message-ID'))
 
-				message = ''
+				message = 'New email arrived'
 				for hdrname in ['From','To','Cc','Subject']:
 					value = mail.get(hdrname) or None
 					if value:
 						(hdrvalue, charset) = email.header.decode_header(value)[0]
 						if isinstance(hdrvalue, str):
-							message += "{}: {}\n".format(hdrname, hdrvalue)
+							message += "\n\t{}: {}".format(hdrname, hdrvalue)
 						elif charset is not None:
-							message += "{}: {}\n".format(hdrname, hdrvalue.decode(charset,'ignore'))
+							message += "\n\t{}: {}".format(hdrname, hdrvalue.decode(charset,'ignore'))
 						else:
-							message += "{}: {}\n".format(hdrname, hdrvalue)
+							message += "\n\t{}: {}".format(hdrname, hdrvalue)
 
 				self.send(room, message, message_type='groupchat')
 			else:
