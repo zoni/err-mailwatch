@@ -15,8 +15,12 @@
 from errbot import BotPlugin, botcmd
 import logging
 
+import sys
+PY2 = sys.version_info[0] == 2
+
 import imaplib
-import email, email.utils, email.header
+from email.header import decode_header, make_header
+import email, email.utils
 import datetime
 
 log = logging.getLogger('errbot.plugins.mailwatch')
@@ -91,13 +95,13 @@ class MailWatch(BotPlugin):
 				for hdrname in ['From','To','Cc','Subject']:
 					value = mail.get(hdrname) or None
 					if value:
-						(hdrvalue, charset) = email.header.decode_header(value)[0]
-						if isinstance(hdrvalue, str):
+						if PY2:
+							pairs = decode_header(value)
+							hdrvalue = ' '.join([ unicode(t[0], t[1] or 'ASCII') for t in pairs ])
 							message += "\n\t{}: {}".format(hdrname, hdrvalue)
-						elif charset is not None:
-							message += "\n\t{}: {}".format(hdrname, hdrvalue.decode(charset,'ignore'))
 						else:
-							message += "\n\t{}: {}".format(hdrname, hdrvalue)
+							hi = make_header(decode_header(value))
+							message += "\n\t{}: {}".format(hdrname, str(hi))
 
 				self.send(room, message, message_type='groupchat')
 			else:
